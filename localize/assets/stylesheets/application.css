@@ -1,0 +1,5 @@
+body { margin: 0px; }
+#main { position: relative; padding: 0; }
+#map { width: 1000px; height: 500px; position: absolute; left: 0px; top: 0px;}
+#canvas { position: absolute; left: 0px; top: 0px; z-index: 999; }
+#log { position: absolute; top: 500px; }

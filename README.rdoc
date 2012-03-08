@@ -1,0 +1,58 @@
+= localize.me
+
+<b>Localize Me</b> is a solution for low cost indoor localization.
+
+
+= Visualization solution
+
+Naturally we all emit energy, this energy comes in different forms. The energy we emit is 
+usually the result of the completion of a task. A task can be anything, even sitting and 
+typing is certain task that emits energy. We radiate waves as we move, we project a mechanical 
+energy when we speak. All things that leave a sort of trail that could be thought of like a 
+contrail from an airplane. Except invisible. 
+
+What would it be like to actually see the energy we emit? Without using IR technologies we 
+can look to tracing our movements and estimate what these trails could look like.
+
+The visualization is realized using the latest technologies like SVG, Canvas, HTML5, CSS3 
+and Javascript and we are willing to see more and more different visualization out there
+pretty soon.
+
+
+= Hardware solution
+
+Localiz Me was called to life by the need to track people position in indoor locations, 
+defining a low cost and easy to install solution. Nowadays the market offers different 
+solutions based on technologies like UWB, Bluetooth, WiFi and Zigbbe. 
+
+They all work out, but noone was  cheap and detailed ad the same time. For this reason, 
+after experimenting different solutions few weeks, we finally decided to use wifi cameras. 
+You can have them at reasonable prices and out of some setups, everything just works.
+
+To elaborate the camera signal we have used the amazing 
+{openTSPS}[https://github.com/labatrockwell/openTSPS].
+
+
+= Architecture
+
+One goal we wanted to reach was realtime comunication with the visualization sistem you
+will have in the browser. To make this we used NodeJS and WebSockets. What we do is to 
+connect to the data offered from the cams, collect and normalize them all, and then offer
+them through websockets. 
+
+We have also a virtual setup so that you can expetiment new visual solutions in no time.
+Here a short guide to make the server up and running.
+
+  $ monogd # you need MongoDB
+  $ coffee app.coffee
+
+If you want to simulate the system start n virtual cameras sending a port as option
+
+  $ node camera 4001
+  $ node camera 4002
+  $ node camera 4003
+  $ node camera 4004
+
+Open your app at localhost:4000 you'll see you application up and running.
+
+
