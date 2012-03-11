@@ -22,14 +22,11 @@ mongoose.connect 'mongodb://localhost/localizemeq'
 Node = new mongoose.Schema
     camera : String   # camera ID
     id     : String   # blob node ID
-    relative:         # position into single camera (%)
-      x : Number
-      y : Number
-    absolute: Array        # position into whole map (%)
+    relative: Array   # position into single camera (%)
+    absolute: Array   # position into whole map (%)
 
 Node.index 
   absolute : '2d'
-  #min : 0, max : 1
 
 Node = mongoose.model 'nodel', Node
 
@@ -131,8 +128,9 @@ set_node = (data, port, cameras) ->
 # -------------
 
 update_node = (node, data, camera) ->
-  node.relative.x = data.centroid.x
-  node.relative.y = data.centroid.y
+  node.id = data.id if data.id
+  node.camera = camera.id
+  node.relative = [data.centroid.x, data.centroid.y]
   absolutize node, camera
   save_node node
   return node
@@ -145,8 +143,7 @@ new_node = (data, port, camera) ->
   node = new Node
     camera: port 
     id: data.id 
-    'relative.x': data.centroid.x
-    'relative.y': data.centroid.y
+    'relative': [data.centroid.x, data.centroid.y]
 
   absolutize node, camera
   save_node node
@@ -166,8 +163,8 @@ save_node = (node) ->
 # ------------------------
 
 absolutize = (node, camera) ->
-  x = camera.positions.x + (camera.dimensions.width * node.relative.x)
-  y = camera.positions.y + (camera.dimensions.height * node.relative.y)
+  x = camera.positions.x + (camera.dimensions.width * node.relative[0])
+  y = camera.positions.y + (camera.dimensions.height * node.relative[1])
   node.absolute = [x, y]
 
 absolutizeX = (x, camera) ->

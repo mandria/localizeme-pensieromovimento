@@ -4,6 +4,8 @@ var update;
 
 $(document).ready(function() {
   var paper = Raphael($('#canvas')[0], settings.map.width + 1, settings.map.height + 1);
+  $('#map').attr('width', map.width);
+  $('#map').attr('height', map.height);
 
   var animation = function(circle) {
     circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 3, "stroke-opacity": 0.3}, 500, function() {
