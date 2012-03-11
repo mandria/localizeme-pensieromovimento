@@ -89,7 +89,7 @@ $(document).ready(function() {
 
     var data = {
       camera: port, 
-      id: Math.floor(Math.random()*1000),
+      id: Math.floor(Math.random()*1000000),
       centroid: {
         x: ((e.clientX - $(this).position().left)/(map.width * camera.dimensions.width)),
         y: ((e.clientY - $(this).position().top)/(map.height * camera.dimensions.height))

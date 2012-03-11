@@ -1,8 +1,8 @@
 (function(exports){
 
   map = {
-    width: 1500,
-    height: 500
+    width: 1000,
+    height: 1000
   };
 
   cameras = {}

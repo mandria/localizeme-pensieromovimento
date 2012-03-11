@@ -17,7 +17,7 @@ app.listen 4000
 # ----------
 
 mongoose = require 'mongoose'
-mongoose.connect 'mongodb://localhost/localizeme'
+mongoose.connect 'mongodb://localhost/localizemeq'
 
 Node = new mongoose.Schema
     camera : String   # camera ID
@@ -33,7 +33,7 @@ Node.index
   absolute : '2d'
   min : 0, max : 1
 
-Node = mongoose.model 'node', Node
+Node = mongoose.model 'nodel', Node
 
 Node.remove {}, -> console.log "Removed all stored records"
 

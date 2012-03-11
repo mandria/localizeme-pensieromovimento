@@ -41,27 +41,27 @@
   ];
 
   real_cameras = [
-    {
-      id: '4001',
-      positions: {
-        x: 0.05,
-        y: 0.05
-      },
-      dimensions: {
-        width: 0.1,
-        height: 0.1
-      }
-    }, {
-      id: '4002',
-      positions: {
-        x: 0.15,
-        y: 0.05
-      },
-      dimensions: {
-        width: 0.1,
-        height: 0.1
-      }
-    }
+    //{
+      //id: '4001',
+      //positions: {
+        //x: 0.05,
+        //y: 0.05
+      //},
+      //dimensions: {
+        //width: 0.1,
+        //height: 0.1
+      //}
+    //}, {
+      //id: '4002',
+      //positions: {
+        //x: 0.15,
+        //y: 0.05
+      //},
+      //dimensions: {
+        //width: 0.1,
+        //height: 0.1
+      //}
+    //}
   ];
 
 }).call(this);
