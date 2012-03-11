@@ -85,7 +85,11 @@ function sync(err, num) {
 app.post('/nodes', function(req, res) {
   node = new Node(req.body);
   node.save()
-  console.log('>', node);
+  io.sockets.json.emit('message', node);
+  //console.log('< NODE >', node);
+  //Node.find({camera: port}, function(err, docs) {
+    //console.log('< NODES >', docs);
+  //})
 })
 
 

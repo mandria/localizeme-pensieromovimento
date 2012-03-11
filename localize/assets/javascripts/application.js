@@ -15,7 +15,7 @@ $(document).ready(function() {
   
   update = function(data) {
     updateNodes(data);
-    //updateLog(data);
+    updateLog(data);
     json = data;
   };
 
@@ -78,17 +78,20 @@ $(document).ready(function() {
 
   function generateNode(e) {
     var port = $(this).data('port');
+    var map = settings.map;
+    var camera = findCamera(port);
     var url  = "http://localhost:4001/nodes";
     var data = {
       camera: port, 
       id: Math.floor(Math.random()*1000),
       centroid: {
-        x: e.clientX - $(this).position().left,
-        y: e.clientY - $(this).position().top
+        x: ((e.clientX - $(this).position().left)/(map.width * camera.dimensions.width)),
+        y: ((e.clientY - $(this).position().top)/(map.height * camera.dimensions.height))
       }
     }
 
     console.log(data);
+
     $.ajax({
       type: 'POST',
       contentType: "application/json", // this makes CORS working
@@ -99,6 +102,11 @@ $(document).ready(function() {
     });
   }
 
+  function findCamera(id) {
+    return _.filter(settings.cameras.fake, function(camera){ 
+      return camera.id == id.toString(); 
+    })[0]; 
+  }
   
 
 });
