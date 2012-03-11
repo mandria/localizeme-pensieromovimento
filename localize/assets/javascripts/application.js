@@ -80,7 +80,7 @@ $(document).ready(function() {
     var port = $(this).data('port');
     var map = settings.map;
     var camera = findCamera(port);
-    var url  = "http://localhost:4001/nodes";
+    var url  = 'http://localhost:' + port + '/nodes';
     var data = {
       camera: port, 
       id: Math.floor(Math.random()*1000),
