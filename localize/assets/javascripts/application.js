@@ -51,18 +51,22 @@ $(document).ready(function() {
     $(found).data('node', node);
     $(found).attr('cx', node.absolute[0] * settings.map.width);
     $(found).attr('cy', node.absolute[1] * settings.map.height);
+
     var contour = $(found).data('contour');
     $(contour).attr('cx', node.absolute[0] * settings.map.width);
     $(contour).attr('cy', node.absolute[1] * settings.map.height);
-    console.log('>', contour);
   }
 
   var initNode = function(node) {
     var x = node.absolute[0] * settings.map.width;
     var y = node.absolute[1] * settings.map.height;
     var circle  = paper.circle(x, y, 2);
-    var contour = paper.circle(x, y, 10).attr({'fill-opacity': '0.8', 'stroke-width': 0.15});
     $(circle.node).data('node', node);
+
+    var camera = findCamera(node.camera);
+    var radius = map.width * camera.merge;
+    console.log(radius);
+    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#fff'});
     $(circle.node).data('contour', contour.node);
 
     animation(circle);
