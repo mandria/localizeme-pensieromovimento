@@ -17,7 +17,7 @@ app.listen 4000
 # ----------
 
 mongoose = require 'mongoose'
-mongoose.connect 'mongodb://localhost/localize'
+mongoose.connect 'mongodb://localhost/localizeme'
 
 Node = new mongoose.Schema
     camera : String   # camera ID
@@ -53,6 +53,7 @@ app.get '/', (req, res) ->
 # -------------------
 
 io.sockets.on 'connection', (socket) ->
+  emitNodes()
   socket.emit 'connected', { message: 'Client successfully connected.' }
   socket.on 'disconnect', -> console.log 'Client disconnected.'
 
@@ -71,7 +72,7 @@ emitNodes = ->
 settings.cameras.real.forEach (camera) ->
   client = require('websocket').client
   socket = new client()
-  
+
   socket.connect 'ws://192.168.1.150:' + camera.id, 'tsps-protocol'
 
   socket.on 'connect', (connection) ->
@@ -113,15 +114,18 @@ set_node = (data, port, cameras) ->
 
   Node.findOne {id: data.id, camera: port}, (err, node) ->
     if node 
+      console.log '> updating existing node'
       update_node node, data, camera
     else
       centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
       console.log(centroid);
-      query = Node.findOne({}).where('absolute').near(centroid).maxDistance(0.01)
+      query = Node.findOne({}).where('absolute').near(centroid).maxDistance(0.1)
       query.exec (err, doc) ->
         if doc
+          console.log '> merging to a too near node'
           update_node doc, data, camera
         else
+          console.log '> creating a new node'
           new_node data, port, camera
 
 # -------------

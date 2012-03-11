@@ -16,7 +16,6 @@
       });
       socket.on('disconnect', function (data) {
         console.log("Server disconnected.");
-        // set a reload after 1 sec
       });
       socket.on('nodes', function (data) {
         update(data);

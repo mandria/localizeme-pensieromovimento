@@ -7,8 +7,7 @@ var program = require('commander');
 program
   .version('0.1')
   .option('-p, --port <port>', 'specify the port [4001]', Number, 4001)
-  .option('-x, --x <x>', 'Fixed x node position [0...1 - % value]', Number, 0)
-  .option('-y, --y <y>', 'Fixed y node position [0...1 - % value]', Number, 0)
+  .option('-m, --manual', 'Manual node generation with click on camera area')
   .parse(process.argv);
 
 
@@ -62,24 +61,24 @@ var Node = new Schema({
 
 Node = mongoose.model('Node', Node);
 
-Node.remove({camera: program.port}, function(){});
-var node = new Node({camera: program.port, 'id': "4382", 'centroid.x': 0.02193, 'centroid.y': 0.89002});
-node.save();
+if (!program.manual) {
+  Node.remove({camera: program.port}, function(){});
+  var node = new Node({camera: program.port, 'id': "4382", 'centroid.x': 0.02193, 'centroid.y': 0.89002});
+  node.save();
 
+  // Every n seconds the updated node position is given
+  setInterval(update, Math.random()*5000);
+}
 
 
 // -------------
 // Logic
 // -------------
 
-// Every n seconds the updated node position is given
-setInterval(update, Math.random()*5000);
 
 function update(){
   console.log('Updating camera');
-  var x = (program.x == 0) ? Math.random() : program.x;
-  var y = (program.y == 0) ? Math.random() : program.y;
-  Node.update({camera: program.port}, {'centroid.x': x, 'centroid.y': y}, {}, sync)
+  Node.update({camera: program.port}, {'centroid.x': Math.random(), 'centroid.y': Math.random()}, {}, sync)
 };
 
 function sync(err, num) {
