@@ -12,10 +12,25 @@ if (!port) {
   console.log("> Running on port", port);
 }
 
-var app = require('express').createServer()
+var express  = require('express')
+  , app = express.createServer()
   , io = require('socket.io').listen(app);
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+}
+
+
+app.configure(function() {
+  app.use(express.bodyParser()); // used to parse the body content
+  app.use(allowCrossDomain);
+})
+
 app.listen(port);
+
 
 
 
@@ -46,11 +61,11 @@ node.save();
 
 
 
-// --------------
-// Controller
+// -------------
+// Logic
 // -------------
 
-// Every 5 seconds the updated node position is given
+// Every n seconds the updated node position is given
 setInterval(update, Math.random()*5000);
 
 function update(){
@@ -63,6 +78,16 @@ function sync(err, num) {
     io.sockets.json.emit('message', doc);
   })
 }
+
+// --------------
+// Controller
+// --------------
+app.post('/nodes', function(req, res) {
+  node = new Node(req.body);
+  node.save()
+  console.log('>', node);
+})
+
 
 
 

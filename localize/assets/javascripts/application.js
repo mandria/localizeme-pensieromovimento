@@ -70,7 +70,35 @@ $(document).ready(function() {
     var width = settings.map.width * camera.dimensions.width;
     var height = settings.map.height * camera.dimensions.height;
     var c = paper.rect(x, y, width, height).attr({fill: '#ff2b7b', 'stroke-width': 0.25});
+    $(c.node).data('port', camera.id);
+    $(c.node).click(generateNode);
   }
 
   initCameras();
+
+  function generateNode(e) {
+    var port = $(this).data('port');
+    var url  = "http://localhost:4001/nodes";
+    var data = {
+      camera: port, 
+      id: Math.floor(Math.random()*1000),
+      centroid: {
+        x: e.clientX - $(this).position().left,
+        y: e.clientY - $(this).position().top
+      }
+    }
+
+    console.log(data);
+    $.ajax({
+      type: 'POST',
+      contentType: "application/json", // this makes CORS working
+      url: url,
+      data: JSON.stringify(data),
+      success: function(){ console.log('done'); },
+      dataType: 'json',
+    });
+  }
+
+  
+
 });
