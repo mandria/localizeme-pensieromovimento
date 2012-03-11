@@ -2,14 +2,21 @@
 // Initialization
 // -------------------
 
-var port = process.argv.splice(2)[0];
-console.log(port);
+var program = require('commander');
 
-if (!port) {
-  console.log("> Insert a :port number when running server");
+program
+  .version('0.1')
+  .option('-p, --port <port>', 'specify the port [4001]', Number, 4001)
+  .option('-x, --x <x>', 'Fixed x node position [0...1 - % value]', Number, 0)
+  .option('-y, --y <y>', 'Fixed y node position [0...1 - % value]', Number, 0)
+  .parse(process.argv);
+
+
+if (!program.port) {
+  console.log("> Specify the port [4001].");
   process.exit(1);
 } else {
-  console.log("> Running on port", port);
+  console.log("> Running on port", program.port);
 }
 
 var express  = require('express')
@@ -29,7 +36,7 @@ app.configure(function() {
   app.use(allowCrossDomain);
 })
 
-app.listen(port);
+app.listen(program.port);
 
 
 
@@ -55,8 +62,8 @@ var Node = new Schema({
 
 Node = mongoose.model('Node', Node);
 
-Node.remove({camera: port}, function(){});
-var node = new Node({camera: port, 'id': "4382", 'centroid.x': 0.02193, 'centroid.y': 0.89002});
+Node.remove({camera: program.port}, function(){});
+var node = new Node({camera: program.port, 'id': "4382", 'centroid.x': 0.02193, 'centroid.y': 0.89002});
 node.save();
 
 
@@ -70,11 +77,13 @@ setInterval(update, Math.random()*5000);
 
 function update(){
   console.log('Updating camera');
-  Node.update({camera: port}, {'centroid.x': Math.random(), 'centroid.y': Math.random()}, {}, sync)
+  var x = (program.x == 0) ? Math.random() : program.x;
+  var y = (program.y == 0) ? Math.random() : program.y;
+  Node.update({camera: program.port}, {'centroid.x': x, 'centroid.y': y}, {}, sync)
 };
 
 function sync(err, num) {
-  Node.findOne({ camera: port}, function (err, doc){
+  Node.findOne({ camera: program.port}, function (err, doc){
     io.sockets.json.emit('message', doc);
   })
 }
@@ -86,10 +95,6 @@ app.post('/nodes', function(req, res) {
   node = new Node(req.body);
   node.save()
   io.sockets.json.emit('message', node);
-  //console.log('< NODE >', node);
-  //Node.find({camera: port}, function(err, docs) {
-    //console.log('< NODES >', docs);
-  //})
 })
 
 
@@ -102,7 +107,7 @@ app.post('/nodes', function(req, res) {
 io.sockets.on('connection', function(socket) {
   // notifies clients on connection
   socket.emit('connected', { 
-    message: 'Successfully connected to ' + port
+    message: 'Successfully connected to ' + program.port
   });
   // Notified by a client being disconnected
   socket.on('disconnect', function() {

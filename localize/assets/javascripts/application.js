@@ -15,7 +15,7 @@ $(document).ready(function() {
   
   update = function(data) {
     updateNodes(data);
-    updateLog(data);
+    //updateLog(data);
     json = data;
   };
 
@@ -76,11 +76,17 @@ $(document).ready(function() {
 
   initCameras();
 
+  // Generate a new node when clicking on a camera area.
+  //
+  // This function is useful for testing puposes where you
+  // can simulate a new node and ckeck logic behaviours like
+  // two nodes too closed to each others.
   function generateNode(e) {
     var port = $(this).data('port');
     var map = settings.map;
     var camera = findCamera(port);
     var url  = 'http://localhost:' + port + '/nodes';
+
     var data = {
       camera: port, 
       id: Math.floor(Math.random()*1000),
@@ -89,8 +95,6 @@ $(document).ready(function() {
         y: ((e.clientY - $(this).position().top)/(map.height * camera.dimensions.height))
       }
     }
-
-    console.log(data);
 
     $.ajax({
       type: 'POST',
