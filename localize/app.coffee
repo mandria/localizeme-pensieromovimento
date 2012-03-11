@@ -114,7 +114,7 @@ set_node = (data, port, cameras) ->
     else
       centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
       console.log(centroid);
-      query = Node.findOne({}).where('absolute').near(centroid).maxDistance(0.1)
+      query = Node.findOne({}).where('absolute').near(centroid).maxDistance(camera.merge)
       query.exec (err, doc) ->
         if doc
           console.log '> merging to a too near node'
