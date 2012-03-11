@@ -25,13 +25,11 @@ Node = new mongoose.Schema
     relative:         # position into single camera (%)
       x : Number
       y : Number
-    absolute:         # position into whole map (%)
-      x : Number
-      y : Number
+    absolute: Array        # position into whole map (%)
 
 Node.index 
   absolute : '2d'
-  min : 0, max : 1
+  #min : 0, max : 1
 
 Node = mongoose.model 'nodel', Node
 
@@ -168,8 +166,9 @@ save_node = (node) ->
 # ------------------------
 
 absolutize = (node, camera) ->
-  node.absolute.x = camera.positions.x + (camera.dimensions.width * node.relative.x)
-  node.absolute.y = camera.positions.y + (camera.dimensions.height * node.relative.y)
+  x = camera.positions.x + (camera.dimensions.width * node.relative.x)
+  y = camera.positions.y + (camera.dimensions.height * node.relative.y)
+  node.absolute = [x, y]
 
 absolutizeX = (x, camera) ->
   camera.positions.x + (camera.dimensions.width * x)

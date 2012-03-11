@@ -45,13 +45,12 @@ $(document).ready(function() {
 
   var moveNode = function(found, node) {
     $(found).data('node', node);
-    //$(found).animate({cx: node.absolute.x * 1000, cy: node.absolute.y * 1000}, 1000);
-    $(found).attr('cx', node.absolute.x * settings.map.width);
-    $(found).attr('cy', node.absolute.y * settings.map.height);
+    $(found).attr('cx', node.absolute[0] * settings.map.width);
+    $(found).attr('cy', node.absolute[1] * settings.map.height);
   }
 
   var initNode = function(node) {
-    var circle = paper.circle(node.absolute.x * settings.map.width, node.absolute.y * settings.map.height, 2);
+    var circle = paper.circle(node.absolute[0] * settings.map.width, node.absolute[1] * settings.map.height, 2);
     $(circle.node).data('node', node);
     animation(circle);
     nodes.push(circle);
