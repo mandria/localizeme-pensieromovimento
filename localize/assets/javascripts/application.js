@@ -6,8 +6,8 @@ $(document).ready(function() {
   var paper = Raphael($('#canvas')[0], settings.map.width + 1, settings.map.height + 1);
 
   var animation = function(circle) {
-    circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 8, "stroke-opacity": 0.3}, 500, function() {
-      circle.animate({fill: "#FFF", stroke: "#000", "stroke-width": 4, "stroke-opacity": 0.7}, 500, function() {
+    circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 3, "stroke-opacity": 0.3}, 500, function() {
+      circle.animate({fill: "#FFF", stroke: "#000", "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
         animation(circle);
       })
     });
@@ -15,7 +15,7 @@ $(document).ready(function() {
   
   update = function(data) {
     updateNodes(data);
-    //updateLog(data);
+    updateLog(data);
     json = data;
   };
 
@@ -51,7 +51,7 @@ $(document).ready(function() {
   }
 
   var initNode = function(node) {
-    var circle = paper.circle(node.absolute.x * settings.map.width, node.absolute.y * settings.map.height, 5);
+    var circle = paper.circle(node.absolute.x * settings.map.width, node.absolute.y * settings.map.height, 2);
     $(circle.node).data('node', node);
     animation(circle);
     nodes.push(circle);

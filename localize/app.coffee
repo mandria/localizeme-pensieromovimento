@@ -19,7 +19,7 @@ app.listen 4000
 mongoose = require 'mongoose'
 mongoose.connect 'mongodb://localhost/localize'
 
-Node = mongoose.model 'node', new mongoose.Schema
+Node = new mongoose.Schema
     camera : String   # camera ID
     id     : String   # blob node ID
     relative:         # position into single camera (%)
@@ -28,6 +28,12 @@ Node = mongoose.model 'node', new mongoose.Schema
     absolute:         # position into whole map (%)
       x : Number
       y : Number
+
+Node.index 
+  absolute : '2d'
+  min : 0, max : 1
+
+Node = mongoose.model 'node', Node
 
 Node.remove {}, -> console.log "Removed all stored records"
 
@@ -109,7 +115,14 @@ set_node = (data, port, cameras) ->
     if node 
       update_node node, data, camera
     else
-      new_node data, port, camera
+      centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
+      console.log(centroid);
+      query = Node.findOne({}).where('absolute').near(centroid).maxDistance(0.01)
+      query.exec (err, doc) ->
+        if doc
+          update_node doc, data, camera
+        else
+          new_node data, port, camera
 
 # -------------
 # Update node
@@ -153,3 +166,9 @@ save_node = (node) ->
 absolutize = (node, camera) ->
   node.absolute.x = camera.positions.x + (camera.dimensions.width * node.relative.x)
   node.absolute.y = camera.positions.y + (camera.dimensions.height * node.relative.y)
+
+absolutizeX = (x, camera) ->
+  camera.positions.x + (camera.dimensions.width * x)
+
+absolutizeY = (y, camera) ->
+  camera.positions.y + (camera.dimensions.height * y)
