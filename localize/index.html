@@ -18,8 +18,19 @@
         console.log("Server disconnected.");
       });
       socket.on('nodes', function (data) {
+        console.log('Nodes changed')
         update(data);
       });
+      socket.on('nodes.delete', function (data) {
+        console.log('Deleted node', data._id);
+        deleteNode(data);
+      });
+      socket.on('nodes.create', function (data) {
+        console.log('Created node', data._id);
+      });
+      socket.on('nodes.update', function (data) {
+        console.log('Updated node', data._id);
+      }); 
     </script>
   </head>
   <body>

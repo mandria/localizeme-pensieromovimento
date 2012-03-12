@@ -20,10 +20,16 @@ mongoose = require 'mongoose'
 mongoose.connect 'mongodb://localhost/localizemeq'
 
 Node = new mongoose.Schema
-    camera : String   # camera ID
-    id     : String   # blob node ID
-    relative: Array   # position into single camera (%)
-    absolute: Array   # position into whole map (%)
+    camera : String       # camera ID
+    id     : String       # blob node ID
+    relative: Array       # position into single camera (%)
+    absolute: Array       # position into whole map (%)
+    activation:
+      status: { type: Boolean, default: false}
+      ticks: { type: Number, default: settings.ticks }
+      created_at: Date
+      updated_at: Date
+
 
 Node.index 
   absolute : '2d'
@@ -57,6 +63,15 @@ io.sockets.on 'connection', (socket) ->
 emitNodes = ->
   Node.find {}, (err, docs) ->
     io.sockets.json.emit 'nodes', docs
+
+createNode = (node) ->
+  io.sockets.json.emit 'nodes.create', node
+
+updateNode = (node) ->
+  io.sockets.json.emit 'nodes.update', node
+
+deleteNode = (node) ->
+  io.sockets.json.emit 'nodes.delete', node
 
 
 
@@ -113,7 +128,6 @@ set_node = (data, port, cameras) ->
       update_node node, data, camera
     else
       centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
-      console.log(centroid);
       query = Node.findOne({}).where('absolute').near(centroid).maxDistance(camera.merge)
       query.exec (err, doc) ->
         if doc
@@ -128,11 +142,16 @@ set_node = (data, port, cameras) ->
 # -------------
 
 update_node = (node, data, camera) ->
-  node.id = data.id if data.id
-  node.camera = camera.id
+  node.id       = data.id   if data.id
+  node.camera   = camera.id if camera.id
   node.relative = [data.centroid.x, data.centroid.y]
+  node.activation.updated_at = new Date();
+  node.activation.ticks     -= 1;
   absolutize node, camera
+
+  activate node if not node.activation.status
   save_node node
+  updateNode node
   return node
 
 # -------------
@@ -144,9 +163,12 @@ new_node = (data, port, camera) ->
     camera: port 
     id: data.id 
     'relative': [data.centroid.x, data.centroid.y]
+    'activation.created_at': new Date()
+    'activation.updated_at': new Date()
 
   absolutize node, camera
   save_node node
+  createNode node
   return node
 
 # ---------------
@@ -163,8 +185,8 @@ save_node = (node) ->
 # ------------------------
 
 absolutize = (node, camera) ->
-  x = camera.positions.x + (camera.dimensions.width * node.relative[0])
-  y = camera.positions.y + (camera.dimensions.height * node.relative[1])
+  x = absolutizeX(node.relative[0], camera)
+  y = absolutizeY(node.relative[1], camera)
   node.absolute = [x, y]
 
 absolutizeX = (x, camera) ->
@@ -172,3 +194,43 @@ absolutizeX = (x, camera) ->
 
 absolutizeY = (y, camera) ->
   camera.positions.y + (camera.dimensions.height * y)
+
+
+
+
+# -----------------------
+# Activation node logic
+# -----------------------
+
+activate = (node) ->
+  delta = (node.activation.updated_at - node.activation.created_at)/1000
+
+  # If the node decreases fast for enough time it is a person
+  console.log delta, settings.timetolive, node.activation.ticks
+  if (node.activation.ticks < 0 and delta < settings.timetolive)
+    node.activation.status = true
+  # If the node decreases but not that fast we reset it so it can still be a person making the whole process again
+  if (node.activation.ticks < 0 and delta > settings.timetolive)
+    node.activation.ticks = settings.ticks
+    node.activation.created_at = new Date()
+
+# ------------------------------------------------
+# Continuous checkin to give a consistent system
+# ------------------------------------------------
+
+# Backround running function to ckeck zombies
+cleanup = ->
+  Node.find {}, (err, nodes) ->
+    checkZombie node for node in nodes
+    process.nextTick cleanup
+
+# If there are no changes for a long time the node is removed
+checkZombie = (node) ->
+  delta = (new Date() - node.activation.updated_at)/1000
+  if (delta > settings.lifetime)
+    deleted = true
+    deleteNode node
+    emitNodes()
+    node.remove()
+
+cleanup()

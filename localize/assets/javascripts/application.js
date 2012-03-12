@@ -1,6 +1,7 @@
 var json = [];
-var nodes = [];
+var nodes = {};
 var update;
+var deleteNode;
 
 $(document).ready(function() {
   var paper = Raphael($('#canvas')[0], settings.map.width + 1, settings.map.height + 1);
@@ -8,11 +9,19 @@ $(document).ready(function() {
   $('#map').attr('height', map.height);
 
   var animation = function(circle) {
-    circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 3, "stroke-opacity": 0.3}, 500, function() {
-      circle.animate({fill: "#FFF", stroke: "#000", "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
+    var active  = $(circle.node).data('node').activation.status;
+    var contour = $(circle.node).data('contour');
+    var stroke  = (active) ? '#ff2b7b' : '#888';
+    var center  = (active) ? '#d40050' : '#666';
+
+    var color = (active) ? '#ff2b7b' : '#666';
+    $(contour).attr({'stroke': color });
+
+    circle.animate({fill: contour, stroke: stroke, "stroke-width": 4, "stroke-opacity": 0.3}, 500, function() {
+      circle.animate({fill: center, stroke: stroke, "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
         animation(circle);
       })
-    });
+    })
   };
   
   update = function(data) {
@@ -48,6 +57,12 @@ $(document).ready(function() {
   }
 
   var moveNode = function(found, node) {
+    if ($(found).data('node') != node.camera) {
+      $($(found).data('contour')).remove();
+      var contour = drawContour(found, node)
+      $(found).data('contour', contour.node);
+    }
+
     $(found).data('node', node);
     $(found).attr('cx', node.absolute[0] * settings.map.width);
     $(found).attr('cy', node.absolute[1] * settings.map.height);
@@ -58,19 +73,36 @@ $(document).ready(function() {
   }
 
   var initNode = function(node) {
+    var circle = drawCircle(node)
+    $(circle.node).data('node', node);
+    var contour = drawContour(circle, node)
+    $(circle.node).data('contour', contour.node);
+    animation(circle);
+    nodes[node._id] = circle;
+  }
+
+  var drawCircle  = function(node) {
     var x = node.absolute[0] * settings.map.width;
     var y = node.absolute[1] * settings.map.height;
     var circle  = paper.circle(x, y, 2);
-    $(circle.node).data('node', node);
+    return circle;
+  }
 
+  var drawContour = function(circle, node) {
+    var x = node.absolute[0] * settings.map.width;
+    var y = node.absolute[1] * settings.map.height;
     var camera = findCamera(node.camera);
-    var radius = map.width * camera.merge;
-    console.log(radius);
-    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#fff'});
-    $(circle.node).data('contour', contour.node);
+    var radius = settings.map.width * camera.merge;
+    var contour = paper.circle(x, y, radius).attr({'stroke-width': 0.25});
+    return contour;
+  }
 
-    animation(circle);
-    nodes.push(circle);
+  deleteNode = function(data) {
+    var node = nodes[data._id];
+    var contour = $(node.node).data('contour')
+    node.remove();
+    $(contour).remove();
+    delete nodes[data._id];
   }
 
   var initCameras = function() {
@@ -85,7 +117,7 @@ $(document).ready(function() {
     var y = settings.map.height * camera.positions.y;
     var width = settings.map.width * camera.dimensions.width;
     var height = settings.map.height * camera.dimensions.height;
-    var c = paper.rect(x, y, width, height).attr({fill: '#ff2b7b', 'stroke-width': 0.25});
+    var c = paper.rect(x, y, width, height).attr({fill: '#eee', 'stroke-width': 0.25, stroke: '#ff2b7b'});
     //paper.path("M 10 115 l 10 0").attr({stroke: '#fff', 'stroke-width': 0.25});
     $(c.node).data('port', camera.id);
     $(c.node).click(generateNode);
@@ -103,14 +135,13 @@ $(document).ready(function() {
     var map = settings.map;
     var camera = findCamera(port);
     var url  = 'http://localhost:' + port + '/nodes';
+    var x = ((e.clientX - $(this).attr('x'))/(map.width * camera.dimensions.width));
+    var y = ((e.clientY - $(this).attr('y'))/(map.height * camera.dimensions.height));
 
     var data = {
       camera: port, 
       id: Math.floor(Math.random()*1000000),
-      centroid: {
-        x: ((e.clientX - $(this).position().left)/(map.width * camera.dimensions.width)),
-        y: ((e.clientY - $(this).position().top)/(map.height * camera.dimensions.height))
-      }
+      centroid: { x: x, y: y }
     }
 
     $.ajax({
@@ -118,7 +149,6 @@ $(document).ready(function() {
       contentType: "application/json", // this makes CORS working
       url: url,
       data: JSON.stringify(data),
-      success: function(){ console.log('done'); },
       dataType: 'json',
     });
   }
