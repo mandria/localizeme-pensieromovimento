@@ -4,6 +4,8 @@ var update;
 
 $(document).ready(function() {
   var paper = Raphael($('#canvas')[0], settings.map.width + 1, settings.map.height + 1);
+  $('#map').attr('width', map.width);
+  $('#map').attr('height', map.height);
 
   var animation = function(circle) {
     circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 3, "stroke-opacity": 0.3}, 500, function() {
@@ -36,8 +38,10 @@ $(document).ready(function() {
     var found = false;
     var circles = $('circle');
     for (var i=0; i<circles.length; i++) {
-      if ($(circles[i]).data('node')._id == node._id) {
-        found = $(circles[i]);
+      if ($(circles[i]).data('node')) {
+        if ($(circles[i]).data('node')._id == node._id) {
+          found = $(circles[i]);
+        }
       }
     }
     found ? moveNode(found, node) : initNode(node);
@@ -45,14 +49,26 @@ $(document).ready(function() {
 
   var moveNode = function(found, node) {
     $(found).data('node', node);
-    //$(found).animate({cx: node.absolute.x * 1000, cy: node.absolute.y * 1000}, 1000);
-    $(found).attr('cx', node.absolute.x * settings.map.width);
-    $(found).attr('cy', node.absolute.y * settings.map.height);
+    $(found).attr('cx', node.absolute[0] * settings.map.width);
+    $(found).attr('cy', node.absolute[1] * settings.map.height);
+
+    var contour = $(found).data('contour');
+    $(contour).attr('cx', node.absolute[0] * settings.map.width);
+    $(contour).attr('cy', node.absolute[1] * settings.map.height);
   }
 
   var initNode = function(node) {
-    var circle = paper.circle(node.absolute.x * settings.map.width, node.absolute.y * settings.map.height, 2);
+    var x = node.absolute[0] * settings.map.width;
+    var y = node.absolute[1] * settings.map.height;
+    var circle  = paper.circle(x, y, 2);
     $(circle.node).data('node', node);
+
+    var camera = findCamera(node.camera);
+    var radius = map.width * camera.merge;
+    console.log(radius);
+    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#fff'});
+    $(circle.node).data('contour', contour.node);
+
     animation(circle);
     nodes.push(circle);
   }
@@ -70,6 +86,7 @@ $(document).ready(function() {
     var width = settings.map.width * camera.dimensions.width;
     var height = settings.map.height * camera.dimensions.height;
     var c = paper.rect(x, y, width, height).attr({fill: '#ff2b7b', 'stroke-width': 0.25});
+    //paper.path("M 10 115 l 10 0").attr({stroke: '#fff', 'stroke-width': 0.25});
     $(c.node).data('port', camera.id);
     $(c.node).click(generateNode);
   }

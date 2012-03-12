@@ -94,6 +94,7 @@ app.post('/nodes', function(req, res) {
   node = new Node(req.body);
   node.save()
   io.sockets.json.emit('message', node);
+  res.send(node);
 })
 
 
