@@ -65,8 +65,7 @@ $(document).ready(function() {
 
     var camera = findCamera(node.camera);
     var radius = map.width * camera.merge;
-    console.log(radius);
-    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#fff'});
+    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#ff2b7b'});
     $(circle.node).data('contour', contour.node);
 
     animation(circle);
@@ -85,7 +84,7 @@ $(document).ready(function() {
     var y = settings.map.height * camera.positions.y;
     var width = settings.map.width * camera.dimensions.width;
     var height = settings.map.height * camera.dimensions.height;
-    var c = paper.rect(x, y, width, height).attr({fill: '#ff2b7b', 'stroke-width': 0.25});
+    var c = paper.rect(x, y, width, height).attr({fill: '#eee', 'stroke-width': 0.25, stroke: '#ff2b7b'});
     //paper.path("M 10 115 l 10 0").attr({stroke: '#fff', 'stroke-width': 0.25});
     $(c.node).data('port', camera.id);
     $(c.node).click(generateNode);
@@ -103,14 +102,13 @@ $(document).ready(function() {
     var map = settings.map;
     var camera = findCamera(port);
     var url  = 'http://localhost:' + port + '/nodes';
+    var x = ((e.clientX - $(this).attr('x'))/(map.width * camera.dimensions.width));
+    var y = ((e.clientY - $(this).attr('y'))/(map.height * camera.dimensions.height));
 
     var data = {
       camera: port, 
       id: Math.floor(Math.random()*1000000),
-      centroid: {
-        x: ((e.clientX - $(this).position().left)/(map.width * camera.dimensions.width)),
-        y: ((e.clientY - $(this).position().top)/(map.height * camera.dimensions.height))
-      }
+      centroid: { x: x, y: y }
     }
 
     $.ajax({
@@ -118,7 +116,6 @@ $(document).ready(function() {
       contentType: "application/json", // this makes CORS working
       url: url,
       data: JSON.stringify(data),
-      success: function(){ console.log('done'); },
       dataType: 'json',
     });
   }

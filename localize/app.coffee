@@ -113,6 +113,7 @@ set_node = (data, port, cameras) ->
       update_node node, data, camera
     else
       centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
+      console.log(data.centroid, centroid);
       console.log(centroid);
       query = Node.findOne({}).where('absolute').near(centroid).maxDistance(camera.merge)
       query.exec (err, doc) ->
@@ -163,8 +164,8 @@ save_node = (node) ->
 # ------------------------
 
 absolutize = (node, camera) ->
-  x = camera.positions.x + (camera.dimensions.width * node.relative[0])
-  y = camera.positions.y + (camera.dimensions.height * node.relative[1])
+  x = absolutizeX(node.relative[0], camera)
+  y = absolutizeY(node.relative[1], camera)
   node.absolute = [x, y]
 
 absolutizeX = (x, camera) ->
