@@ -27,8 +27,8 @@ Node = new mongoose.Schema
     activation:
       status: { type: Boolean, default: false}
       ticks: { type: Number, default: 50 }
-      created_at: { type: Date, default: new Date() }
-      updated_at: { type: Date, default: new Date() }
+      created_at: Date
+      updated_at: Date
 
 
 Node.index 
@@ -63,6 +63,15 @@ io.sockets.on 'connection', (socket) ->
 emitNodes = ->
   Node.find {}, (err, docs) ->
     io.sockets.json.emit 'nodes', docs
+
+createNode = (node) ->
+  io.sockets.json.emit 'nodes.create', node
+
+updateNode = (node) ->
+  io.sockets.json.emit 'nodes.update', node
+
+deleteNode = (node) ->
+  io.sockets.json.emit 'nodes.delete', node
 
 
 
@@ -136,10 +145,13 @@ update_node = (node, data, camera) ->
   node.id       = data.id   if data.id
   node.camera   = camera.id if camera.id
   node.relative = [data.centroid.x, data.centroid.y]
+  node.activation.updated_at = new Date();
+  node.activation.ticks     -= 1;
   absolutize node, camera
 
   activate node if not node.activation.status
   save_node node
+  updateNode node
   return node
 
 # -------------
@@ -151,9 +163,12 @@ new_node = (data, port, camera) ->
     camera: port 
     id: data.id 
     'relative': [data.centroid.x, data.centroid.y]
+    'activation.created_at': new Date()
+    'activation.updated_at': new Date()
 
   absolutize node, camera
   save_node node
+  createNode node
   return node
 
 # ---------------
@@ -184,9 +199,26 @@ absolutizeY = (y, camera) ->
 # Activation node logic
 # -----------------------
 
+# If the node decreases fast for enough time it is a person
 activate = (node) ->
-  node.activation.updated_at = new Date();
-  node.activation.ticks -= 1;
   delta = (node.activation.created_at - node.activation.updated_at)/1000
   node.activation.status = true if (node.activation.ticks < 0 and delta < 60)
-  save_node node
+
+# Continuous checkin to give a consistent system
+cleanup = ->
+  Node.find {}, (err, nodes) ->
+    for node in nodes
+      checkZombie(node);
+    process.nextTick cleanup
+
+# If there are no changes for a long time the node is removed
+checkZombie = (node) ->
+  delta = (new Date() - node.activation.updated_at)/1000
+  if (delta > 30)
+    console.log '> Removed zombie'
+    deleted = true
+    deleteNode node
+    emitNodes()
+    node.remove()
+
+cleanup()

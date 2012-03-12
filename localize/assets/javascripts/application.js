@@ -1,6 +1,7 @@
 var json = [];
-var nodes = [];
+var nodes = {};
 var update;
+var deleteNode;
 
 $(document).ready(function() {
   var paper = Raphael($('#canvas')[0], settings.map.width + 1, settings.map.height + 1);
@@ -12,12 +13,11 @@ $(document).ready(function() {
     var contour   = (active) ? '#ac0041' : '#aaa';
     var stroke = (active) ? '#ff2b7b' : '#888';
     var center  = (active) ? '#d40050' : '#666';
-
     circle.animate({fill: contour, stroke: stroke, "stroke-width": 4, "stroke-opacity": 0.3}, 500, function() {
       circle.animate({fill: center, stroke: stroke, "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
         animation(circle);
       })
-    });
+    })
   };
   
   update = function(data) {
@@ -80,13 +80,21 @@ $(document).ready(function() {
     $(contour).attr({'stroke': color });
 
     animation(circle);
-    nodes.push(circle);
+    nodes[node._id] = circle;
   }
 
   function colorContour(node) {
     var color = (node.activation.status) ? '#ff2b7b' : '#666';
     if (!node.activation.status) {$(contour).attr({'stroke': color });}
 
+  }
+
+  deleteNode = function(data) {
+    var node = nodes[data._id];
+    var contour = $(node.node).data('contour')
+    node.remove();
+    $(contour).remove();
+    delete nodes[data._id];
   }
 
   var initCameras = function() {
