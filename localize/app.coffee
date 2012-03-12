@@ -20,10 +20,16 @@ mongoose = require 'mongoose'
 mongoose.connect 'mongodb://localhost/localizemeq'
 
 Node = new mongoose.Schema
-    camera : String   # camera ID
-    id     : String   # blob node ID
-    relative: Array   # position into single camera (%)
-    absolute: Array   # position into whole map (%)
+    camera : String       # camera ID
+    id     : String       # blob node ID
+    relative: Array       # position into single camera (%)
+    absolute: Array       # position into whole map (%)
+    activation:
+      status: { type: Boolean, default: false}
+      ticks: { type: Number, default: 50 }
+      created_at: { type: Date, default: new Date() }
+      updated_at: { type: Date, default: new Date() }
+
 
 Node.index 
   absolute : '2d'
@@ -113,8 +119,6 @@ set_node = (data, port, cameras) ->
       update_node node, data, camera
     else
       centroid = [absolutizeX(data.centroid.x, camera), absolutizeY(data.centroid.y, camera)]
-      console.log(data.centroid, centroid);
-      console.log(centroid);
       query = Node.findOne({}).where('absolute').near(centroid).maxDistance(camera.merge)
       query.exec (err, doc) ->
         if doc
@@ -129,10 +133,12 @@ set_node = (data, port, cameras) ->
 # -------------
 
 update_node = (node, data, camera) ->
-  node.id = data.id if data.id
-  node.camera = camera.id
+  node.id       = data.id   if data.id
+  node.camera   = camera.id if camera.id
   node.relative = [data.centroid.x, data.centroid.y]
   absolutize node, camera
+
+  activate node if not node.activation.status
   save_node node
   return node
 
@@ -173,3 +179,14 @@ absolutizeX = (x, camera) ->
 
 absolutizeY = (y, camera) ->
   camera.positions.y + (camera.dimensions.height * y)
+
+# -----------------------
+# Activation node logic
+# -----------------------
+
+activate = (node) ->
+  node.activation.updated_at = new Date();
+  node.activation.ticks -= 1;
+  delta = (node.activation.created_at - node.activation.updated_at)/1000
+  node.activation.status = true if (node.activation.ticks < 0 and delta < 60)
+  save_node node

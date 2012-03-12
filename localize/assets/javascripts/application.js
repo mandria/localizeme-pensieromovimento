@@ -8,8 +8,13 @@ $(document).ready(function() {
   $('#map').attr('height', map.height);
 
   var animation = function(circle) {
-    circle.animate({fill: "#223fa3", stroke: "#000", "stroke-width": 3, "stroke-opacity": 0.3}, 500, function() {
-      circle.animate({fill: "#FFF", stroke: "#000", "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
+    var active = $(circle.node).data('node').activation.status;
+    var contour   = (active) ? '#ac0041' : '#aaa';
+    var stroke = (active) ? '#ff2b7b' : '#888';
+    var center  = (active) ? '#d40050' : '#666';
+
+    circle.animate({fill: contour, stroke: stroke, "stroke-width": 4, "stroke-opacity": 0.3}, 500, function() {
+      circle.animate({fill: center, stroke: stroke, "stroke-width": 2, "stroke-opacity": 0.7}, 500, function() {
         animation(circle);
       })
     });
@@ -55,6 +60,9 @@ $(document).ready(function() {
     var contour = $(found).data('contour');
     $(contour).attr('cx', node.absolute[0] * settings.map.width);
     $(contour).attr('cy', node.absolute[1] * settings.map.height);
+
+    var color = (node.activation.status) ? '#ff2b7b' : '#666';
+    $(contour).attr({'stroke': color });
   }
 
   var initNode = function(node) {
@@ -65,11 +73,20 @@ $(document).ready(function() {
 
     var camera = findCamera(node.camera);
     var radius = map.width * camera.merge;
-    var contour = paper.circle(x, y, radius).attr({'fill-opacity': '0.8', 'stroke-width': 0.25, stroke: '#ff2b7b'});
+    var contour = paper.circle(x, y, radius).attr({'stroke-width': 0.25});
     $(circle.node).data('contour', contour.node);
+
+    var color = (node.activation.status) ? '#ff2b7b' : '#666';
+    $(contour).attr({'stroke': color });
 
     animation(circle);
     nodes.push(circle);
+  }
+
+  function colorContour(node) {
+    var color = (node.activation.status) ? '#ff2b7b' : '#666';
+    if (!node.activation.status) {$(contour).attr({'stroke': color });}
+
   }
 
   var initCameras = function() {
