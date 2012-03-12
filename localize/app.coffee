@@ -24,11 +24,10 @@ Node = new mongoose.Schema
     id     : String       # blob node ID
     relative: Array       # position into single camera (%)
     absolute: Array       # position into whole map (%)
-    activation:
-      status: { type: Boolean, default: false}
-      ticks: { type: Number, default: settings.ticks }
-      created_at: Date
-      updated_at: Date
+    active: { type: Boolean, default: false }
+    ticks: { type: Number, default: settings.ticks }
+    created_at: Date
+    updated_at: Date
 
 
 Node.index 
@@ -145,11 +144,11 @@ update_node = (node, data, camera) ->
   node.id       = data.id   if data.id
   node.camera   = camera.id if camera.id
   node.relative = [data.centroid.x, data.centroid.y]
-  node.activation.updated_at = new Date();
-  node.activation.ticks     -= 1;
+  node.updated_at = new Date();
+  node.ticks     -= 1;
   absolutize node, camera
 
-  activate node if not node.activation.status
+  activate node if not node.active
   save_node node
   updateNode node
   return node
@@ -163,8 +162,8 @@ new_node = (data, port, camera) ->
     camera: port 
     id: data.id 
     'relative': [data.centroid.x, data.centroid.y]
-    'activation.created_at': new Date()
-    'activation.updated_at': new Date()
+    'created_at': new Date()
+    'updated_at': new Date()
 
   absolutize node, camera
   save_node node
@@ -203,16 +202,16 @@ absolutizeY = (y, camera) ->
 # -----------------------
 
 activate = (node) ->
-  delta = (node.activation.updated_at - node.activation.created_at)/1000
+  delta = (node.updated_at - node.created_at)/1000
 
   # If the node decreases fast for enough time it is a person
-  console.log delta, settings.timetolive, node.activation.ticks
-  if (node.activation.ticks < 0 and delta < settings.timetolive)
-    node.activation.status = true
+  console.log delta, settings.timetolive, node.ticks
+  if (node.ticks < 0 and delta < settings.timetolive)
+    node.active = true
   # If the node decreases but not that fast we reset it so it can still be a person making the whole process again
-  if (node.activation.ticks < 0 and delta > settings.timetolive)
-    node.activation.ticks = settings.ticks
-    node.activation.created_at = new Date()
+  if (node.ticks < 0 and delta > settings.timetolive)
+    node.ticks = settings.ticks
+    node.created_at = new Date()
 
 # ------------------------------------------------
 # Continuous checkin to give a consistent system
@@ -226,7 +225,7 @@ cleanup = ->
 
 # If there are no changes for a long time the node is removed
 checkZombie = (node) ->
-  delta = (new Date() - node.activation.updated_at)/1000
+  delta = (new Date() - node.updated_at)/1000
   if (delta > settings.lifetime)
     deleted = true
     deleteNode node

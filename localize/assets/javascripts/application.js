@@ -9,7 +9,7 @@ $(document).ready(function() {
   $('#map').attr('height', map.height);
 
   var animation = function(circle) {
-    var active  = $(circle.node).data('node').activation.status;
+    var active  = $(circle.node).data('node').active;
     var contour = $(circle.node).data('contour');
     var stroke  = (active) ? '#ff2b7b' : '#888';
     var center  = (active) ? '#d40050' : '#666';
@@ -27,7 +27,7 @@ $(document).ready(function() {
   
   update = function(data) {
     updateNodes(data);
-    updateLog(data);
+    //updateLog(data);
     json = data;
   };
 
