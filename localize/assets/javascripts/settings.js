@@ -44,7 +44,7 @@
   // Time after which a node is considered dead if it does 
   // not move. For example if a person does not move for n 
   // seconds we suppose that she is gone or she is dead :)
-  lifetime = 150;
+  lifetime = 60;
 
   // Time untill the ticks needs to decrease. A person is 
   // alway moving so this time should be short.

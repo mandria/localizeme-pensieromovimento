@@ -15,7 +15,7 @@
         console.log(data.message);
       });
       socket.on('disconnect', function (data) {
-        console.log("Server disconnected.");
+        console.log("Server disconnected. Please RELOAD!");
       });
       socket.on('nodes', function (data) {
         console.log('Nodes changed')
