@@ -57,6 +57,12 @@ $(document).ready(function() {
   }
 
   var moveNode = function(found, node) {
+    if ($(found).data('node') != node.camera) {
+      $($(found).data('contour')).remove();
+      var contour = drawContour(found, node)
+      $(found).data('contour', contour.node);
+    }
+
     $(found).data('node', node);
     $(found).attr('cx', node.absolute[0] * settings.map.width);
     $(found).attr('cy', node.absolute[1] * settings.map.height);
@@ -67,18 +73,28 @@ $(document).ready(function() {
   }
 
   var initNode = function(node) {
+    var circle = drawCircle(node)
+    $(circle.node).data('node', node);
+    var contour = drawContour(circle, node)
+    $(circle.node).data('contour', contour.node);
+    animation(circle);
+    nodes[node._id] = circle;
+  }
+
+  var drawCircle  = function(node) {
     var x = node.absolute[0] * settings.map.width;
     var y = node.absolute[1] * settings.map.height;
     var circle  = paper.circle(x, y, 2);
-    $(circle.node).data('node', node);
+    return circle;
+  }
 
+  var drawContour = function(circle, node) {
+    var x = node.absolute[0] * settings.map.width;
+    var y = node.absolute[1] * settings.map.height;
     var camera = findCamera(node.camera);
-    var radius = map.width * camera.merge;
+    var radius = settings.map.width * camera.merge;
     var contour = paper.circle(x, y, radius).attr({'stroke-width': 0.25});
-    $(circle.node).data('contour', contour.node);
-
-    animation(circle);
-    nodes[node._id] = circle;
+    return contour;
   }
 
   deleteNode = function(data) {
