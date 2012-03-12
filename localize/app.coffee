@@ -26,7 +26,7 @@ Node = new mongoose.Schema
     absolute: Array       # position into whole map (%)
     activation:
       status: { type: Boolean, default: false}
-      ticks: { type: Number, default: 50 }
+      ticks: { type: Number, default: settings.ticks }
       created_at: Date
       updated_at: Date
 
@@ -195,27 +195,39 @@ absolutizeX = (x, camera) ->
 absolutizeY = (y, camera) ->
   camera.positions.y + (camera.dimensions.height * y)
 
+
+
+
 # -----------------------
 # Activation node logic
 # -----------------------
 
-# If the node decreases fast for enough time it is a person
 activate = (node) ->
-  delta = (node.activation.created_at - node.activation.updated_at)/1000
-  node.activation.status = true if (node.activation.ticks < 0 and delta < 60)
+  delta = (node.activation.updated_at - node.activation.created_at)/1000
 
+  # If the node decreases fast for enough time it is a person
+  console.log delta, settings.timetolive, node.activation.ticks
+  if (node.activation.ticks < 0 and delta < settings.timetolive)
+    node.activation.status = true
+  # If the node decreases but not that fast we reset it so it can still be a person making the whole process again
+  if (node.activation.ticks < 0 and delta > settings.timetolive)
+    node.activation.ticks = settings.ticks
+    node.activation.created_at = new Date()
+
+# ------------------------------------------------
 # Continuous checkin to give a consistent system
+# ------------------------------------------------
+
+# Backround running function to ckeck zombies
 cleanup = ->
   Node.find {}, (err, nodes) ->
-    for node in nodes
-      checkZombie(node);
+    checkZombie node for node in nodes
     process.nextTick cleanup
 
 # If there are no changes for a long time the node is removed
 checkZombie = (node) ->
   delta = (new Date() - node.activation.updated_at)/1000
-  if (delta > 30)
-    console.log '> Removed zombie'
+  if (delta > settings.lifetime)
     deleted = true
     deleteNode node
     emitNodes()

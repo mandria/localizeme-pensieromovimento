@@ -77,6 +77,7 @@ $(document).ready(function() {
     $(circle.node).data('contour', contour.node);
 
     var color = (node.activation.status) ? '#ff2b7b' : '#666';
+    console.log(node.activation.status, color);
     $(contour).attr({'stroke': color });
 
     animation(circle);
