@@ -29,8 +29,24 @@ They all work out, but noone was  cheap and detailed ad the same time. For this 
 after experimenting different solutions few weeks, we finally decided to use wifi cameras. 
 You can have them at reasonable prices and out of some setups, everything just works.
 
-To elaborate the camera signal we have used the amazing 
-{openTSPS}[https://github.com/labatrockwell/openTSPS].
+To elaborate the camera signal we have used {openTSPS}[https://github.com/labatrockwell/openTSPS].
+It is an open-source software that can be configured through 5 tabs. Each of them has
+some useful parameters that we are gonna set in different ways from installation to 
+installation.
+
+* Video Tab -> Use amplification. Gives an higher contrast to the video (31 is a good value).
+* Background -> Progressive background. Set it to the max values, as the frame rate we sample is 
+very low for performance reasons. It rebuild the background. This is very useful if you move an 
+object because in this way after a while it disappears.
+* Differencing -> Threshold. A good value is around 20. If you need to check small staff you 
+need to lower it down. If you need to track big objects you can put a bigger value.
+* Differencing -> Type of differencing. Depending from the background use the best one. If you
+have a white floor, use dark on light (recognize dark stuff on the white background)
+* Differencing -> Use highpass. It remove some pixel noise. A good value is around 100 for 
+the blur and 15 for the noise.
+* Differencing -> Use shape smoothing. It makes the blob much more cleaner. a good value is around 7.
+* Sensing. Here ignore nested blobs and deactivate everything else.
+* Communication. Keep activated only Send via Websockets and remember to set the right port.
 
 
 = Architecture
