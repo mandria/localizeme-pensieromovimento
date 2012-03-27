@@ -153,7 +153,8 @@ $(document).ready(function() {
   }
 
   function findCamera(id) {
-    return _.filter(settings.cameras.fake, function(camera){ 
+    var cameras = settings.cameras.fake.concat(settings.cameras.real);
+    return _.filter(cameras, function(camera){ 
       return camera.id == id.toString(); 
     })[0]; 
   }

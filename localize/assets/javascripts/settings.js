@@ -16,13 +16,13 @@
       dimensions: { width: 0.25, height: 0.25 } }, 
     { id: '4002', merge: 0.05,
       positions:  { x: 0.25, y: 0.0 },
-      dimensions: { width: 0.25, height: 0.25 } }, 
-    { id: '4003', merge: 0.05, 
-      positions:  { x: 0.5, y: 0.0 },
-      dimensions: { width: 0.25, height: 0.25 } }, 
-    { id: '4004', merge: 0.05,
-      positions:  { x: 0.75, y: 0.0 },
       dimensions: { width: 0.25, height: 0.25 } }
+    //{ id: '4003', merge: 0.05, 
+      //positions:  { x: 0.5, y: 0.0 },
+      //dimensions: { width: 0.25, height: 0.25 } }, 
+    //{ id: '4004', merge: 0.05,
+      //positions:  { x: 0.75, y: 0.0 },
+      //dimensions: { width: 0.25, height: 0.25 } }
   ];
 
   // Real Camera list
@@ -33,22 +33,22 @@
     //{ id: '4002', merge: 0.05,
       //positions:  { x: 0.25, y: 0.0 },
       //dimensions: { width: 0.25, height: 0.25 } }, 
-    //{ id: '4003', merge: 0.05, 
-      //positions:  { x: 0.5, y: 0.0 },
-      //dimensions: { width: 0.25, height: 0.25 } }, 
-    //{ id: '4004', merge: 0.05,
-      //positions:  { x: 0.75, y: 0.0 },
-      //dimensions: { width: 0.25, height: 0.25 } }
+    { id: '4003', merge: 0.08, 
+      positions:  { x: 0.5, y: 0.0 },
+      dimensions: { width: 0.25, height: 0.25 } }, 
+    { id: '4004', merge: 0.08,
+      positions:  { x: 0.75, y: 0.0 },
+      dimensions: { width: 0.25, height: 0.25 } }
   ];
 
   // Time after which a node is considered dead if it does 
   // not move. For example if a person does not move for n 
   // seconds we suppose that she is gone or she is dead :)
-  lifetime = 60;
+  lifetime = 30;
 
   // Time untill the ticks needs to decrease. A person is 
   // alway moving so this time should be short.
-  timetolive = 10;
+  timetolive = 15;
 
   // Times a node has to move in the same spot before it
   // is recognize as a person. In real use cases a person 
@@ -56,7 +56,7 @@
   // to life it needs to show itself for several times. 
   // Only if this node is replicated several times for a
   // short period we have a person.
-  ticks = 10;
+  ticks = 30;
 
   exports.map = map;
   exports.cameras = cameras;

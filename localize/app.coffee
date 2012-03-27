@@ -85,7 +85,7 @@ settings.cameras.real.forEach (camera) ->
   socket.connect 'ws://192.168.1.150:' + camera.id, 'tsps-protocol'
 
   socket.on 'connect', (connection) ->
-    port = @socket._peername.port
+    port = @socket._peername.port.toString()
     console.log '> Connected to camera', port
 
     connection.on 'error', (error) -> console.log '> Error connection to camera', port
@@ -93,7 +93,8 @@ settings.cameras.real.forEach (camera) ->
 
     connection.on 'message', (data) ->
       data = JSON.parse data.utf8Data
-      setNode data, port, settings.cameras.real
+      console.log '> Found camera', settings.cameras.real
+      set_node data, port, settings.cameras.real
 
 
 
@@ -120,7 +121,7 @@ settings.cameras.fake.forEach (camera) ->
 
 set_node = (data, port, cameras) ->
   camera = (camera for camera in cameras when camera.id == port)[0]
-
+  console.log ">> >> >>", data, port, cameras, camera
   Node.findOne {id: data.id, camera: port}, (err, node) ->
     if node 
       console.log '> updating existing node'

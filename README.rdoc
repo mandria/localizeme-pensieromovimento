@@ -64,10 +64,10 @@ Here a short guide to make the server up and running.
 
 If you want to simulate the system start n virtual cameras sending a port as option
 
-  $ node camera 4001
-  $ node camera 4002
-  $ node camera 4003
-  $ node camera 4004
+  $ node camera
+  $ node camera -p 4002
+  $ node camera -p 4003 -m 
+  $ node camera -p 4004 -m 
 
 Open your app at localhost:4000 you'll see you application up and running.
 
